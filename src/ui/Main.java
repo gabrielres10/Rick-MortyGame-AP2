@@ -60,10 +60,11 @@ public class Main {
 			}
 
 			if (board.getBoard().gameOver()) {
-				System.out.println("no hay mas semillas");
+				System.out.println("-----No hay mas semillas-----");
 				long endTime = System.nanoTime();
 				long duration = (long) ((endTime - startTime) * 0.000000001);
-				board.determineWinner(duration);
+				System.out.println(board.determineWinner(duration));
+				System.out.println(board.getPodium());
 			}
 		}
 
@@ -81,20 +82,23 @@ public class Main {
 	private static int login() {
 		// TODO Auto-generated method stub
 
-		System.out.println("Type your username: ");
-		String nickname = sc.next();
-		Player newPlayer = new Player(nickname);
-
-		if (!fileExists("data/UserData.txt")) {
-			UserData.userData.add(newPlayer);
-			saveAsJavaByteCode();
-		} else if (!verifyUserExists(nickname)) {
-			UserData.userData.add(newPlayer);
-		}
-
+		
+		Player newPlayer = null;
+		String nickname = "";
+		do {
+			System.out.println("Type your username: ");
+			nickname = sc.next();
+			newPlayer = new Player(nickname);
+			if (!verifyUserExists(nickname)) {
+				UserData.userData.add(newPlayer);
+				break;
+			}else {
+				System.out.println("This user is already registered");
+			}
+			
+		}while(verifyUserExists(nickname));
 		int playerIndex = UserData.userData.indexOf(newPlayer);
 		return playerIndex;
-
 	}
 
 	/**
@@ -176,7 +180,7 @@ public class Main {
 		boolean exit = false;
 		int opcion = 0;
 
-		while (!exit) {
+		while (!exit && board.getWinner() == null) {
 			String player = i == 0 ? "Rick" : "Morty";
 
 			System.out.println("It is " + player + "'s turn! ---What do you want to do?----\n" + "1. Roll dice\n"
@@ -215,7 +219,6 @@ public class Main {
 	public static void throwDice(int i) {
 		int option = 1;
 		int dice = 1 + (int) (Math.random() * 6);
-		dice = sc.nextInt();
 		System.out.println(dice + " is the value of the dice!\n");
 
 		do {

@@ -141,15 +141,32 @@ public class Board {
 		int rickScore = (int) (rickSeeds * 120 - duration);
 		int mortyScore = (int) (mortySeeds * 120 - duration);
 		if(rickScore>mortyScore) {
-			UserData.addAndSort(UserData.userData.get(rick));
+			UserData.userData.get(rick).setScore(rickScore);
+			winner = UserData.userData.get(rick);
+			UserData.addAndSort(winner);
 			output = "Rick ha ganado con " + rickSeeds;
 		}else if (rickScore<mortyScore) {
-			UserData.addAndSort(UserData.userData.get(morty));
-			output = "Morty ha ganado con " + mortySeeds;
+			UserData.userData.get(morty).setScore(mortyScore);
+			winner = UserData.userData.get(morty);
+			UserData.addAndSort(winner);
+			output = "Morty ha ganado con " + mortySeeds + "semilla(s)";
 		}else {
 			output = "EMPATE";
 		}
 		return output;
+	}
+	
+	public String getPodium() {
+		String out = "TOP 5 players \n \n";
+		int i = 0;
+		for (Player a : UserData.podium) {
+			if(i>4) {
+				break;
+			}
+			out+=a.toString() + "\n";
+			i++;
+		}
+		return out;
 	}
 
 }

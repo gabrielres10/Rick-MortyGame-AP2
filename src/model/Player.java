@@ -25,4 +25,9 @@ public class Player implements Serializable {
 	public void setNickName(String nickName) {
 		this.nickname = nickName;
 	}
+	
+	@Override
+	public String toString() {
+		return "Nickname: " + nickname + " | Score: " + score;
+	}
 }

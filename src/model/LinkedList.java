@@ -77,9 +77,13 @@ public class LinkedList {
 	 * This method randomly places Rick and Morty around the board.
 	 */
 	private void setRickAndMorty() {
-		int i = 1 + (int) (Math.random() * boxesQuant - 1);
-		int j = 1 + (int) (Math.random() * boxesQuant - 1);
-		if (i != j && !get(head, i).getSeed() && !get(head, j).getSeed()) {
+		int i = 0;
+		int j = 0;
+		while (i == j) {
+			i = 1 + (int) (Math.random() * (boxesQuant - 1));
+			j = 1 + (int) (Math.random() * (boxesQuant - 1));
+		}
+		if (!get(head, i).getSeed() && !get(head, j).getSeed()) {
 			get(head, i).setRick(new Token('R'));
 			get(head, j).setMorty(new Token('M'));
 		} else {
@@ -370,47 +374,22 @@ public class LinkedList {
 				current.setRick(t);
 				if (link) {
 					rick = true;
+					travelByLink(current, rick);
 				}
 			} else {
 				t.addCollectedSeeds(seed);
 				current.setMorty(t);
+				if (link) {
+					rick = false;
+					travelByLink(current, rick);
+				}
+
 			}
-			travelByLink(current, rick);
 
 			return;
 		}
 		// Metodo recursivo
 		movePlayerForward(current.getNext(), t, dice - 1, tokenToMove);
-	}
-
-	/**
-	 * This method sets the token of a node into its link
-	 * 
-	 * @param node, Node, this is the node that has a link
-	 * @param rick, boolean, it is true if the token is rick, false if it is morty
-	 */
-	private void travelByLink(Node node, boolean rick) {
-		Node found = get(head, node.getIndex());
-		found.setRick(null);
-		found.setMorty(null);
-		if(node.getLink()!=null) {
-			if (rick) {
-				node.getLink().setRick(new Token('R'));
-				if (node.getSeed()) {
-					node.getLink().setSeed(false);
-					node.getLink().getRick().addCollectedSeeds();
-					;
-				}
-			} else {
-				node.getLink().setMorty(new Token('M'));
-				if (node.getSeed()) {
-					node.getLink().setSeed(false);
-					node.getLink().getMorty().addCollectedSeeds();
-					;
-				}
-			}
-		}
-		
 	}
 
 	/**
@@ -442,23 +421,52 @@ public class LinkedList {
 				link = true;
 			}
 
-			if (tokenToMove.getAsciiSymbol() == 'M') {
+			if (tokenToMove.getAsciiSymbol() == 'R') {
 				t.addCollectedSeeds(seed);
 				current.setRick(t);
+				if (link) {
+					rick = true;
+					travelByLink(current, rick);
+				}
 			} else {
 				t.addCollectedSeeds(seed);
 				current.setMorty(t);
 				if (link) {
-					rick = true;
+					rick = false;
+					travelByLink(current, rick);
 				}
 			}
-
-			travelByLink(current, rick);
-
 			return;
 		}
 		// Metodo recursivo
 		movePlayerBackward(current.getPrev(), t, dice - 1, tokenToMove);
+	}
+
+	/**
+	 * This method sets the token of a node into its link
+	 * 
+	 * @param node, Node, this is the node that has a link
+	 * @param rick, boolean, it is true if the token is rick, false if it is morty
+	 */
+	private void travelByLink(Node node, boolean rick) {
+		Node found = get(head, node.getIndex());
+		found.setRick(null);
+		found.setMorty(null);
+		if (rick) {
+			node.getLink().setRick(new Token('R'));
+			if (node.getSeed()) {
+				node.getLink().setSeed(false);
+				node.getLink().getRick().addCollectedSeeds();
+			}
+		} else {
+			node.getLink().setMorty(new Token('M'));
+			if (node.getSeed()) {
+				node.getLink().setSeed(false);
+				node.getLink().getMorty().addCollectedSeeds();
+				;
+			}
+		}
+
 	}
 
 	/**
@@ -621,7 +629,7 @@ public class LinkedList {
 		if (node.getLink() != null) {
 			return "[" + node.getLinkTo() + "]";
 		} else {
-			return "[  ]";
+			return "[ ]";
 		}
 
 	}
