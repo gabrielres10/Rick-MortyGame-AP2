@@ -35,16 +35,18 @@ public class Main {
 	 */
 	public static void main(String[] args) {
 
-		if (fileExists("data/UserData.txt")) {
+		if (fileExists("data/userData.txt")) {
 			loadUserData();
 		}
-
-		int rickIndex;
+		if (fileExists("data/podium.txt")) {
+			loadPodium();
+		}
+		int rickIndex = -1;
 		int mortyIndex;
 		System.out.println("Rick: ");
-		rickIndex = login();
+		rickIndex = login(rickIndex);
 		System.out.println("Morty: ");
-		mortyIndex = login();
+		mortyIndex = login(rickIndex);
 		initBoard(rickIndex, mortyIndex);
 		int i = 0;
 
@@ -60,11 +62,13 @@ public class Main {
 			}
 
 			if (board.getBoard().gameOver()) {
-				System.out.println("-----No hay mas semillas-----");
+				System.out.println("-----No more seeds on the board-----");
 				long endTime = System.nanoTime();
 				long duration = (long) ((endTime - startTime) * 0.000000001);
 				System.out.println(board.determineWinner(duration));
 				System.out.println(board.getPodium());
+				savePodiumAsJavaByteCode();
+				break;
 			}
 		}
 
@@ -75,30 +79,52 @@ public class Main {
 	 * is currently registered. If the user is'n registered yet, it will be added to
 	 * the static variable <b>dataUser</b>
 	 * 
+	 * @param rick, int, this is the index of the user who will play rick
 	 * @return playerIndex, int, this is the index of the player that is trying to
 	 *         login, it will be the size of the array if its a new player,
 	 *         otherwise, it will correspond to its first occurrence into the array
 	 */
-	private static int login() {
+	private static int login(int rick) {
 		// TODO Auto-generated method stub
-
-		
 		Player newPlayer = null;
 		String nickname = "";
+		int playerIndex = 0;
+		boolean flag = false;
 		do {
-			System.out.println("Type your username: ");
+			System.out.println("Type your username:");
 			nickname = sc.next();
 			newPlayer = new Player(nickname);
-			if (!verifyUserExists(nickname)) {
+
+			if (rick != -1 && nickname.equals(UserData.userData.get(rick).getNickName())) {
+				System.out.println("You can't login twice");
+				flag = true;
+			} else if (!verifyUserExists(nickname)) {
 				UserData.userData.add(newPlayer);
+				saveUsersAsJavaByteCode();
+				System.out.println("New player " + nickname + " registered");
+				playerIndex = UserData.userData.indexOf(newPlayer);
 				break;
-			}else {
-				System.out.println("This user is already registered");
+			} else {
+				System.out.println("Welcome again " + nickname);
+				playerIndex = getIndexOf(nickname);
+				flag = false;
 			}
-			
-		}while(verifyUserExists(nickname));
-		int playerIndex = UserData.userData.indexOf(newPlayer);
+		} while (flag);
 		return playerIndex;
+	}
+
+	/**
+	 * This method gets the position of a player with a specific name
+	 * 
+	 * @param nickname, this is the name to search
+	 */
+	private static int getIndexOf(String nickname) {
+		for (int i = 0; i < UserData.userData.size(); i++) {
+			if (UserData.userData.get(i).getNickName().equals(nickname)) {
+				return i;
+			}
+		}
+		return -1;
 	}
 
 	/**
@@ -135,12 +161,12 @@ public class Main {
 
 	/**
 	 * This method saves all the data contained on the ArrayList
-	 * "CineController.userData"
+	 * "UserData.userData"
 	 */
-	public static void saveAsJavaByteCode() {
+	public static void saveUsersAsJavaByteCode() {
 		try {
 			ArrayList<Player> userList = UserData.userData;
-			File ref = new File("data/UserData.txt");
+			File ref = new File("data/userData.txt");
 			FileOutputStream fos = new FileOutputStream(ref);
 			ObjectOutputStream oos = new ObjectOutputStream(fos);
 			oos.writeObject(userList);
@@ -157,11 +183,48 @@ public class Main {
 	public static void loadUserData() {
 
 		try {
-			File file = new File("data/UserData.txt");
+			File file = new File("data/userData.txt");
 			FileInputStream fis = new FileInputStream(file);
 			ObjectInputStream ois = new ObjectInputStream(fis);
 			ArrayList<Player> userList = (ArrayList<Player>) ois.readObject();
 			UserData.userData = userList;
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * This method saves all the data contained on the ArrayList
+	 * "UserData.podium"
+	 */
+	public static void savePodiumAsJavaByteCode() {
+		try {
+			ArrayList<Player> podium = UserData.podium;
+			File ref = new File("data/podium.txt");
+			FileOutputStream fos = new FileOutputStream(ref);
+			ObjectOutputStream oos = new ObjectOutputStream(fos);
+			oos.writeObject(podium);
+			oos.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * This Method loads the serialized information in the static variable
+	 * UserData.podium for its later use in execution
+	 */
+	public static void loadPodium() {
+
+		try {
+			File file = new File("data/podium.txt");
+			FileInputStream fis = new FileInputStream(file);
+			ObjectInputStream ois = new ObjectInputStream(fis);
+			ArrayList<Player> podium = (ArrayList<Player>) ois.readObject();
+			UserData.podium = podium;
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (ClassNotFoundException e) {
@@ -219,6 +282,7 @@ public class Main {
 	public static void throwDice(int i) {
 		int option = 1;
 		int dice = 1 + (int) (Math.random() * 6);
+		dice = sc.nextInt();
 		System.out.println(dice + " is the value of the dice!\n");
 
 		do {
@@ -301,6 +365,7 @@ public class Main {
 	 */
 	public static void initBoard(int rickIndex, int mortyIndex) {
 
+		System.out.println("\n **** Creating the board! **** \n");
 		int n, m, p, q;
 		System.out.println("Enter the number of rows");
 		m = sc.nextInt();
@@ -320,6 +385,9 @@ public class Main {
 		} while (q >= n * m);
 
 		board = new Board(rickIndex, mortyIndex, m, n, q, p);
+
+		System.out.println("THE BOARD HAS BEEN CREATED SUCCESSFULLY");
+		System.out.println(board.showBoard());
 
 	}
 

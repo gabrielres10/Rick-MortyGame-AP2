@@ -144,14 +144,14 @@ public class Board {
 			UserData.userData.get(rick).setScore(rickScore);
 			winner = UserData.userData.get(rick);
 			UserData.addAndSort(winner);
-			output = "Rick ha ganado con " + rickSeeds;
+			output = "Rick has won with " + rickSeeds + " seed(s)";
 		}else if (rickScore<mortyScore) {
 			UserData.userData.get(morty).setScore(mortyScore);
 			winner = UserData.userData.get(morty);
 			UserData.addAndSort(winner);
-			output = "Morty ha ganado con " + mortySeeds + "semilla(s)";
+			output = "Morty has won with " + mortySeeds + " seed(s)";
 		}else {
-			output = "EMPATE";
+			output = "DRAW";
 		}
 		return output;
 	}

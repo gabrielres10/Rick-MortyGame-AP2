@@ -193,7 +193,6 @@ public class LinkedList {
 		} else {
 			acc += getIndexesLeft(current, 0, m, "") + "\n";
 		}
-
 		return toString(increaseNode(current, 0, m), acc, m, n, j + 1);
 	}
 
@@ -360,30 +359,45 @@ public class LinkedList {
 		if (dice == 0) {
 			boolean link = false;
 			boolean rick = false;
-			int seed = 0;
-			if (current.getSeed()) {
-				current.setSeed(false);
-				seed = 1;
-			}
+			boolean seedsPicked = false;
 			if (current.getLink() != null) {
 				link = true;
 			}
 
 			if (tokenToMove.getAsciiSymbol() == 'R') {
-				t.addCollectedSeeds(seed);
 				current.setRick(t);
 				if (link) {
 					rick = true;
-					travelByLink(current, rick);
+					if(current.getSeed()) {
+						pickSeeds(current, rick);
+						seedsPicked = true;
+					}
+					if(seedsPicked) {
+						seedsPicked = !travelByLink(current, rick);
+					}else {
+						seedsPicked = travelByLink(current, rick);
+					}
+					
 				}
 			} else {
-				t.addCollectedSeeds(seed);
 				current.setMorty(t);
 				if (link) {
 					rick = false;
-					travelByLink(current, rick);
+					if(current.getSeed()) {
+						pickSeeds(current, rick);
+						seedsPicked = true;
+					}
+					if(seedsPicked) {
+						seedsPicked = !travelByLink(current, rick);
+					}else {
+						seedsPicked = travelByLink(current, rick);
+					}
 				}
 
+			}
+			// Adding the seeds
+			if (!seedsPicked) {
+				pickSeeds(current, rick);
 			}
 
 			return;
@@ -412,29 +426,42 @@ public class LinkedList {
 		if (dice == 0) {
 			boolean link = false;
 			boolean rick = false;
-			int seed = 0;
-			if (current.getSeed()) {
-				current.setSeed(false);
-				seed = 1;
-			}
+			boolean seedsPicked = false;
 			if (current.getLink() != null) {
 				link = true;
 			}
-
 			if (tokenToMove.getAsciiSymbol() == 'R') {
-				t.addCollectedSeeds(seed);
 				current.setRick(t);
 				if (link) {
 					rick = true;
-					travelByLink(current, rick);
+					if(current.getSeed()) {
+						pickSeeds(current, rick);
+						seedsPicked = true;
+					}
+					if(seedsPicked) {
+						seedsPicked = !travelByLink(current, rick);
+					}else {
+						seedsPicked = travelByLink(current, rick);
+					}
 				}
 			} else {
-				t.addCollectedSeeds(seed);
 				current.setMorty(t);
 				if (link) {
 					rick = false;
-					travelByLink(current, rick);
+					if(current.getSeed()) {
+						pickSeeds(current, rick);
+						seedsPicked = true;
+					}
+					if(seedsPicked) {
+						seedsPicked = !travelByLink(current, rick);
+					}else {
+						seedsPicked = travelByLink(current, rick);
+					}
 				}
+			}
+			// Adding the seeds
+			if (!seedsPicked) {
+				pickSeeds(current, rick);
 			}
 			return;
 		}
@@ -442,31 +469,39 @@ public class LinkedList {
 		movePlayerBackward(current.getPrev(), t, dice - 1, tokenToMove);
 	}
 
+	private void pickSeeds(Node current, boolean rick) {
+		// Adding the seeds
+		if (current.getSeed()) {
+			current.setSeed(false);
+		}
+		if (rick) {
+			current.getRick().addCollectedSeeds();
+		} else {
+			current.getMorty().addCollectedSeeds();
+		}
+	}
+
 	/**
 	 * This method sets the token of a node into its link
 	 * 
 	 * @param node, Node, this is the node that has a link
 	 * @param rick, boolean, it is true if the token is rick, false if it is morty
+	 * @return
 	 */
-	private void travelByLink(Node node, boolean rick) {
+	private boolean travelByLink(Node node, boolean rick) {
 		Node found = get(head, node.getIndex());
 		found.setRick(null);
 		found.setMorty(null);
 		if (rick) {
 			node.getLink().setRick(new Token('R'));
-			if (node.getSeed()) {
-				node.getLink().setSeed(false);
-				node.getLink().getRick().addCollectedSeeds();
-			}
 		} else {
 			node.getLink().setMorty(new Token('M'));
-			if (node.getSeed()) {
-				node.getLink().setSeed(false);
-				node.getLink().getMorty().addCollectedSeeds();
-				;
-			}
 		}
-
+		if (node.getLink().getSeed()) {
+			pickSeeds(node.getLink(), rick);
+			return true;
+		}
+		return false;
 	}
 
 	/**
@@ -572,7 +607,7 @@ public class LinkedList {
 		} else {
 			acc += getIndexesLeftLinks(current, 0, m, "") + "\n";
 		}
-
+		
 		return toStringLinks(increaseNode(current, 0, m), acc, m, n, j + 1);
 	}
 
