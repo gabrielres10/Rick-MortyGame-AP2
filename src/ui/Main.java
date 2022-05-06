@@ -282,7 +282,6 @@ public class Main {
 	public static void throwDice(int i) {
 		int option = 1;
 		int dice = 1 + (int) (Math.random() * 6);
-		dice = sc.nextInt();
 		System.out.println(dice + " is the value of the dice!\n");
 
 		do {
@@ -375,13 +374,16 @@ public class Main {
 			System.out.println("Enter the quantity of links");
 			p = sc.nextInt();
 			if (p > (n * m) / 2) {
-				System.out.println("The amount of links cannot be less than " + (n * m) / 2);
+				System.out.println("The amount of links must be less than " + (n * m) / 2);
 			}
 		} while (p > (n * m) / 2);
 
 		System.out.println("Enter the quantity of seeds");
 		do {
 			q = sc.nextInt();
+			if(q >= n * m) {
+				System.out.println("The amount of seeds must be less or equal to " + (n * m) / 2);
+			}
 		} while (q >= n * m);
 
 		board = new Board(rickIndex, mortyIndex, m, n, q, p);
